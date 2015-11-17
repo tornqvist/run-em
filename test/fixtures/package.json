@@ -1,0 +1,8 @@
+{
+  "name": "fixture-a",
+  "version": "1.0.0",
+  "description": "Test fixture",
+  "scripts": {
+    "test": "if [ -f $TEMPFILE ]; then echo a > $TEMPFILE; fi"
+  }
+}

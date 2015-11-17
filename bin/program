@@ -1,0 +1,7 @@
+#!/usr/bin/env node
+
+import path from 'path';
+import { list, run } from '../index';
+
+list(path.dirname(__dirname)).then(scripts => console.log(scripts));
+run(path.dirname(__dirname), 'foo');
