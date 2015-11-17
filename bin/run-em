@@ -1,0 +1,40 @@
+#!/usr/bin/env node
+
+/*eslint no-console:  0*/
+require('babel-core/register');
+
+const api = require('../index');
+const pkg = require('../package.json');
+const chalk = require('chalk');
+const program = require('commander');
+
+program
+  .version(pkg.version)
+  .usage('<dir> <script> [arguments...]')
+  .arguments('<dir> <script> [arguments...]')
+  .action((dir, script) => {
+    const child = api.run(dir, script);
+
+    child.on('data', chunk => console.log(chunk.toString()));
+    child.on('error', console.error);
+  });
+
+program
+  .command('list <dir>')
+  .alias('ls')
+  .description('List all available scripts in dir')
+  .action(dir => api.list(dir).then(scripts => {
+    Object.keys(scripts).forEach(file => {
+      console.log(`\n${ chalk.gray(file) }`);
+
+      scripts[file].forEach(script => {
+        console.log(`    ${ chalk.green(script) }`);
+      });
+    });
+  }));
+
+program.parse(process.argv);
+
+if (!process.argv.slice(2).length) {
+  program.outputHelp();
+}

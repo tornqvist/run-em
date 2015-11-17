@@ -1,11 +1,12 @@
 {
-  "name": "re-run",
+  "name": "run-em",
   "version": "0.1.0",
   "description": "Recursively run npm scripts in subdirs",
   "main": "index.js",
+  "bin": "bin/run-em",
   "scripts": {
     "test": "tape test/program.js",
-    "foo": "echo bar"
+    "posttest": "eslint ./"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,8 @@
   "dependencies": {
     "async": "^1.5.0",
     "babel-core": "^6.1.21",
+    "chalk": "^1.1.1",
+    "commander": "^2.9.0",
     "glob": "^6.0.1",
     "mz": "^2.1.0"
   },
