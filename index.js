@@ -1,22 +1,22 @@
 import path from 'path';
-import npm from 'npm';
 import glob from 'glob';
 import fs from 'mz/fs';
 import { series } from 'async';
+import { spawn } from 'child_process';
+import { EventEmitter } from 'events';
 
 const BLACKLIST = ['node_modules'];
 
 export function run(dir, script, ...args) {
-  return globber(dir).then(files => {
-    return new Promise((resolve, reject) => {
-      series(
-        files.map(exec(script, args)),
-        (err, result) => {
-          if (err) { return reject(err); }
-          resolve(result);
-        });
+  const api = new EventEmitter();
+
+  globber(dir).then(files => {
+    series(files.map(exec(api, script, args)), (err, codes) => {
+      api.emit(err ? 'error' : 'close', err || codes);
     });
   });
+
+  return api;
 }
 
 export function list(dir) {
@@ -40,7 +40,6 @@ function globber(dir) {
 
     glob(pattern, { ignore }, (err, files) => {
       if (err) { return reject(err); }
-
       resolve(files);
     });
   });
@@ -52,17 +51,25 @@ function collect(file) {
     .then(pkg => [file, Object.keys(pkg.scripts)]);
 }
 
-function exec(script, args = []) {
+function exec(api, script, args = []) {
   return function (file) {
     return function (callback) {
-      npm.load({ prefix: path.dirname(file) }, err => {
-        if (err) { return callback(err); }
-
-        npm.commands['run-script']([ script, ...args ], (err, data) => {
-          if (err) { return callback(err); }
-          callback(null, data);
-        });
+      const child = spawn('npm', [ script, ...args ], {
+        env: process.env,
+        cwd: path.dirname(file)
       });
+
+      if (child.stderr) {
+        child.stderr.on('data', chunk => api.emit('data', chunk));
+      }
+
+      if (child.stdout) {
+        child.stdout.on('data', chunk => api.emit('data', chunk));
+      }
+
+      child.on('error', callback);
+
+      child.on('close', code => callback(null, code));
     };
   };
 }

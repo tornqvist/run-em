@@ -1,9 +1,9 @@
+'use strict';
+
 require('babel-core/register');
 
 const path = require('path');
 const test = require('tape');
-const fs = require('mz/fs');
-const tempfile = require('tempfile');
 const pkg = require('../package.json');
 const program = require(path.resolve(__dirname, '..', pkg.main));
 
@@ -52,13 +52,25 @@ test('list includes node_modules when specified in path', assert => {
 });
 
 test('executes scripts', assert => {
-  const file = process.env.TEMPFILE = tempfile();
+  const queue = [ 'a', 'b' ];
+  const child = program.run(path.resolve(__dirname, 'fixtures'), 'test');
 
-  program.run(path.resolve(__dirname, 'fixtures'), 'test')
-    .catch(assert.end)
-    .then(() => fs.readFile(file))
-    .then(contents => {
-      console.log('FOO', contents);
-      assert.end();
-    });
+  child.on('data', chunk => {
+    const output = chunk.toString().trim();
+
+    if (queue.indexOf(output) !== -1) {
+      queue.splice(queue.indexOf(output), 1);
+    }
+  });
+
+  child.on('error', assert.end);
+  child.on('close', () => {
+    let err = null;
+
+    if (queue.length !== 0) {
+      err = new Error('program exited before all had scripts run');
+    }
+
+    assert.end(err);
+  });
 });
