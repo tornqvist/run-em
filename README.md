@@ -41,6 +41,10 @@ $ npm install -g run-em
 $ run-em all/my/modules test
 ```
 
+## License
+
+MIT
+
 ## Todo
 
 - [ ] Error handling
