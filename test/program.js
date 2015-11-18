@@ -7,16 +7,31 @@ const test = require('tape');
 const pkg = require('../package.json');
 const program = require(path.resolve(__dirname, '..', pkg.main));
 
-test('lists all scripts', assert => {
-  program.list(path.resolve(__dirname, 'fixtures'))
+test('lists scripts', assert => {
+  const dir = path.resolve(__dirname, 'fixtures');
+
+  program.list(dir)
     .catch(assert.end)
     .then(scripts => {
       Object.keys(scripts).forEach(file => {
-        const dirname = path.dirname(file).replace(`${ __dirname }/`, '');
+        const pkg = require(file);
 
-        assert.equal(scripts[file].length, 1, `${ dirname } has one script`);
-        assert.equal(scripts[file][0], 'test', `${ dirname } has script "test"`);
+        assert.equal(scripts[file].length, 1, `one script found in "${ pkg.name }"`);
+        assert.equal(scripts[file][0], 'test', `script "test" found in "${ pkg.name }"`);
       });
+
+      assert.end();
+    });
+});
+
+test('list excludes files that has no scripts', assert => {
+  program.list(path.resolve(__dirname, 'fixtures'))
+    .catch(assert.end)
+    .then(scripts => {
+      assert.ok(
+        Object.keys(scripts).every(file => !file.match(/\/c\//)),
+        'no script found in "c" package'
+      );
 
       assert.end();
     });
@@ -28,23 +43,25 @@ test('list excludes node_modules by default', assert => {
     .then(scripts => {
       assert.ok(
         Object.keys(scripts).every(file => !file.match(/node_modules/)),
-        'no script in node_modules found'
+        'no script found in "node_modules"'
       );
 
       assert.end();
     });
 });
 
-test('list includes node_modules when specified in path', assert => {
-  const dirname = 'fixtures/node_modules/c';
+test('list includes node_modules when specified in dir', assert => {
+  const dir = path.resolve(__dirname, 'fixtures/node_modules');
 
-  program.list(path.resolve(__dirname, dirname))
+  program.list(dir)
     .catch(assert.end)
     .then(scripts => {
+      var pkg = require(Object.keys(scripts)[0]);
+
       assert.equal(
         Object.keys(scripts).length,
         1,
-        `one script found in ${ dirname }`
+        `one script found in "${ pkg.name }"`
       );
 
       assert.end();
