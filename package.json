@@ -1,7 +1,7 @@
 {
   "name": "run-em",
   "version": "0.1.0",
-  "description": "Recursively run npm scripts in subdirs",
+  "description": "Run npm scripts in some dir",
   "main": "index.js",
   "bin": "bin/run-em",
   "scripts": {
