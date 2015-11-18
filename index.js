@@ -158,7 +158,7 @@ function exec(api, script, args = []) {
          * Execute command
          */
 
-        const child = spawn('npm', [ script, ...args ], {
+        const child = spawn('npm', [ 'run-script', script, ...args ], {
           env: process.env,
           cwd: path.dirname(file)
         });
