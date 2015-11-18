@@ -14,19 +14,19 @@ program
   .description(`Find all packages in dir and run <script>
 
   Example: ${ chalk.grey('run-em some/dir test') }`)
-  .option('-i, --ignore <folders>', 'List of folders to ignore', split)
+  .option('-i, --ignore <folders>', 'Comma separated list of folders to ignore', split)
   .option('-s, --silent', 'Do not log script output')
   .action((dir, script, args) => {
     const options = { ignore: program.ignore };
     const child = api.run.apply(api, [ dir, script, options, ...args ]);
 
     if (!program.silent) {
-      child.on('data', chunk => console.log(chunk.toString()));
+      child.on('data', chunk => console.log(chunk.toString().trim()));
     }
 
     child.on('error', err => console.error(err));
     child.on('close', () => {
-      console.log(chalk.gray('All scripts "%s" finished'), script);
+      console.log(chalk.gray('\nAll scripts "%s" finished'), script);
     });
   });
 
@@ -35,7 +35,6 @@ program
   .alias('ls')
   .usage('<dir>')
   .description('List all available scripts in dir')
-  .option('-i, --ignore <folders>', 'Comma separated list of folders to ignore', split)
   .action(dir => {
     const options = { ignore: program.ignore };
 
