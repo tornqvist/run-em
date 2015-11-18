@@ -48,5 +48,5 @@ MIT
 ## Todo
 
 - [ ] Error handling
-- [ ] Comments
+- [x] Comments
 - [ ] Better readme coverage
