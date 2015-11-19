@@ -24,7 +24,7 @@ program
       child.on('data', chunk => console.log(chunk.toString().trim()));
     }
 
-    child.on('error', err => console.error(err));
+    child.on('error', err => console.error(err.toString().trim()));
     child.on('close', () => {
       console.log(chalk.gray('\nAll scripts "%s" finished'), script);
     });

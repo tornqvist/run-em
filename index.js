@@ -1,9 +1,10 @@
-import path from 'path';
-import glob from 'glob';
-import fs from 'mz/fs';
-import { series } from 'async';
-import { spawn } from 'child_process';
-import { EventEmitter } from 'events';
+'use strict';
+
+const path = require('path');
+const glob = require('glob');
+const fs = require('mz/fs');
+const spawn = require('child_process').spawn;
+const MultiStream = require('multistream');
 
 const BLACKLIST = ['node_modules'];
 
@@ -13,41 +14,49 @@ const BLACKLIST = ['node_modules'];
  * @param  {String}        script  Name of script to run
  * @param  {Object}        options Modifies behaviour (optional)
  * @param  {Array<String>} ...args Rest params passed to script
- * @return {EventEmitter}          Forwards script output
+ * @return {MultiStream}           Child processes streams in one
  */
 
-export function run(dir, script, options = {}, ...args) {
-  const api = new EventEmitter();
-
-  /**
-   * If options is not an object add it to the arguments list
-   */
-
-  if (typeof options !== 'object') {
-    args.unshift(options);
-  }
+function run(dir, script, options) {
+  let queue;
+  let args = Array.prototype.slice.call(
+    arguments,
+    typeof options !== 'object' ? 3 : 2
+  );
 
   /**
    * Find all package.json
    */
 
-  globber(dir, options).then(files => {
-    /**
-     * Run scripts in series
-     */
+  return MultiStream(callback => {
+    function createStream() {
+      exec(queue.shift(), script, args).then(child => {
+        if (child) {
+          callback(null, child.stdout);
+          callback(null, child.stderr);
 
-    series(
-      files.map(exec(api, script, args)),
-      (err, codes) => {
-        /**
-         * Emit error or close depending on output
-         */
-
-        api.emit(err ? 'error' : 'close', err || codes);
+          child.on('exit', code => {
+            if (code === 1) { process.exit(1); }
+          });
+        }
       });
-  });
+    }
 
-  return api;
+    if (!queue) {
+      globber(dir, options).then(files => {
+        if (files) {
+          queue = files;
+          createStream();
+        } else {
+          callback(null, null);
+        }
+      });
+    } else if (!queue.length) {
+      callback(null, null);
+    } else {
+      createStream();
+    }
+  });
 }
 
 /**
@@ -57,7 +66,7 @@ export function run(dir, script, options = {}, ...args) {
  * @return {Promise}        Resolves to hash with key/value => file/scripts
  */
 
-export function list(dir, options = {}) {
+function list(dir, options) {
   /**
    * Find all package.json files
    */
@@ -91,6 +100,8 @@ export function list(dir, options = {}) {
  */
 
 function globber(dir, options) {
+  options = options || {};
+
   return new Promise((resolve, reject) => {
     dir = dir.replace(/\/$/, '');
 
@@ -138,46 +149,27 @@ function collect(file) {
  * @return {Function}             Iterable
  */
 
-function exec(api, script, args = []) {
-  return function (file) {
+function exec(file, script, args) {
+  args = args || [];
+
+  return collect(file).then(scripts => {
     /**
-     * Callback for `async.series` wrapper
+     * Check that package has script
      */
 
-    return function (callback) {
-      collect(file).then(scripts => {
-        /**
-         * Check that package has script
-         */
+    if (!scripts || scripts.indexOf(script) === -1) {
+      return null;
+    }
 
-        if (!scripts || scripts.indexOf(script) === -1) {
-          return callback(null);
-        }
+    /**
+     * Execute command
+     */
 
-        /**
-         * Execute command
-         */
-
-        const child = spawn('npm', [ 'run-script', script, ...args ], {
-          env: process.env,
-          cwd: path.dirname(file)
-        });
-
-        /**
-         * Forward events to api
-         */
-
-        if (child.stderr) {
-          child.stderr.on('data', chunk => api.emit('data', chunk));
-        }
-
-        if (child.stdout) {
-          child.stdout.on('data', chunk => api.emit('data', chunk));
-        }
-
-        child.on('error', callback);
-        child.on('close', code => callback(null, code));
-      });
-    };
-  };
+    return spawn('npm', [ 'run-script', script, ...args ], {
+      env: process.env,
+      cwd: path.dirname(file)
+    });
+  });
 }
+
+module.exports = { run, list };
