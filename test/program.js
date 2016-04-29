@@ -1,7 +1,5 @@
 'use strict';
 
-require('babel-core/register');
-
 const path = require('path');
 const test = require('tape');
 const pkg = require('../package.json');

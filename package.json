@@ -27,7 +27,7 @@
   "homepage": "https://github.com/tornqvist/re-run#readme",
   "dependencies": {
     "async": "^1.5.0",
-    "babel-core": "^6.1.21",
+    "babel-register": "^6.7.2",
     "chalk": "^1.1.1",
     "commander": "^2.9.0",
     "glob": "^6.0.1",
