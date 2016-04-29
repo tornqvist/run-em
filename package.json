@@ -1,6 +1,6 @@
 {
   "name": "run-em",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Run npm scripts in some dir",
   "main": "index.js",
   "bin": "bin/run-em",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tornqvist/re-run.git"
+    "url": "git+https://github.com/tornqvist/run-em.git"
   },
   "keywords": [
     "npm",
@@ -22,9 +22,9 @@
   "author": "Carl Törnqvist <calle.tornqvist@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tornqvist/re-run/issues"
+    "url": "https://github.com/tornqvist/run-em/issues"
   },
-  "homepage": "https://github.com/tornqvist/re-run#readme",
+  "homepage": "https://github.com/tornqvist/run-em#readme",
   "dependencies": {
     "async": "^1.5.0",
     "babel-register": "^6.7.2",
