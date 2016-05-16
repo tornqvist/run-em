@@ -1,6 +1,6 @@
 {
   "name": "run-em",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Run npm scripts in some dir",
   "main": "index.js",
   "bin": "bin/run-em",
