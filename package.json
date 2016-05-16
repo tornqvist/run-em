@@ -6,7 +6,9 @@
   "bin": "bin/run-em",
   "scripts": {
     "test": "tape test/program.js",
-    "posttest": "eslint ./"
+    "posttest": "eslint ./ --ignore-pattern lib/",
+    "prepublish": "npm run build",
+    "build": "babel ./src/run-em.js > lib/run-em.js"
   },
   "repository": {
     "type": "git",
@@ -27,15 +29,16 @@
   "homepage": "https://github.com/tornqvist/run-em#readme",
   "dependencies": {
     "async": "^1.5.0",
-    "babel-register": "^6.7.2",
-    "babel-preset-es2015-node5": "^1.1.0",
     "chalk": "^1.1.1",
     "commander": "^2.9.0",
     "glob": "^6.0.1",
     "mz": "^2.1.0"
   },
   "devDependencies": {
+    "babel-cli": "^6.8.0",
     "babel-eslint": "^4.1.5",
+    "babel-preset-node5": "^11.1.0",
+    "babel-register": "^6.8.0",
     "eslint": "^1.9.0",
     "mz": "^2.1.0",
     "tape": "^4.2.2"

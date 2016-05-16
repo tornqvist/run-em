@@ -1,9 +1,10 @@
 'use strict';
 
+require('babel-register');
+
 const path = require('path');
 const test = require('tape');
-const pkg = require('../package.json');
-const program = require(path.resolve(__dirname, '..', pkg.main));
+const program = require('../src/run-em');
 
 test('lists scripts', assert => {
   const dir = path.resolve(__dirname, 'fixtures');

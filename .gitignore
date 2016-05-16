@@ -1,2 +1,5 @@
 # Libraries
 /node_modules
+
+# Compiled files
+/lib
